@@ -1,0 +1,92 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+pip-wheel-metadata/
+
+# Virtualenvs
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Pytest
+.pytest_cache/
+__pycache__/
+
+# Coverage
+.coverage
+coverage.xml
+htmlcov/
+
+# mypy
+.mypy_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# VS Code
+.vscode/
+
+# IDEs
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temp files
+*.log
+*.tmp
+celerybeat-schedule
+*.local
+
+# Hugging Face / model caches and local model artifacts
+# (global caches are typically outside repo; include common local folders here)
+models/checkpoints/
+models/fine_tuned_llm/
+*.ckpt
+*.pt
+*.bin
+*.model
+
+# Data files
+data/
+*.sqlite3
+*.db
+
+# Secrets and credentials
+.env
+.env.*
+*.pem
+*.key
+
+# Documentation
+docs/_build/
+
+# Misc
+*.swp
+*.swo
+.ropeproject

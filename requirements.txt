@@ -1,0 +1,40 @@
+streamlit
+pandas
+PyPDF2
+
+# requirements.txt
+# Core dependencies
+chromadb
+sentence-transformers
+transformers
+accelerate
+torch
+
+langchain
+
+langchain_community
+# Medical terminology
+pandas
+numpy
+
+# Configuration and utils
+pyyaml
+python-dotenv
+loguru
+
+# Evaluation
+scikit-learn
+plotly
+seaborn
+
+# Testing
+pytest
+pytest-cov
+
+# 
+chardet
+
+hf_xet
+
+sentencepiece
+
