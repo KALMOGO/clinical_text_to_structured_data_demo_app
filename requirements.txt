@@ -38,3 +38,7 @@ hf_xet
 
 sentencepiece
 
+langchain
+langchain-openai
+aiohttp
+tenacity

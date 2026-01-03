@@ -6,6 +6,9 @@ import PyPDF2
 import os
 import sys
 
+from src.data_anonymization import MedicalTextAnonymizer
+from src.extraction import process_csv
+from src.structured_results import json_to_mesh_mapped_dataframe
 
 # Ensure the project's `src` directory is on sys.path so imports resolve
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -13,7 +16,6 @@ SRC  = os.path.join(ROOT, 'src')
 sys.path.insert(0, SRC)
 
 
-from src.data_anonymization import MedicalTextAnonymizer
 
 st.markdown(
     """
@@ -78,7 +80,7 @@ def extract_information(anonymized_text):
     """
     # Define the prompt for the fine-tuned model
     prompt = ""
-    prompt_path = "prompt.txt" 
+    prompt_path = "src/extraction/prompt.txt"
     ""
     # Load prompt from file
     if os.path.exists(prompt_path):
@@ -86,14 +88,48 @@ def extract_information(anonymized_text):
             prompt = f.read()
     else:      
         raise FileNotFoundError("Prompt file not found: prompts/extraction_prompt.txt")
-    print(prompt)
+    # print(prompt)
 
     # Call the fine-tuned model to extract lifestyle, treatment, comorbidities
-    ... # Placeholder for model inference code
+    # Placeholder for model inference code
+    ### TODO: Insert model inference code here to extract: lifestyle, usual treatment, comorbidities
+    # 
+    INPUT_PATH = "src/extraction/extraction_dataset/obs_labelled.csv"
+    OUTPUT_PATH = "src/extraction/extraction_dataset/preprocessed"
+    process_csv(INPUT_PATH, OUTPUT_PATH)
 
+    df = pd.read_csv(INPUT_PATH)
+    #print(df.head())
 
     # Placeholder: return dummy XML
-    return "<xml><patient><name>John Doe</name><age>30</age></patient></xml>"
+    return """
+  <medication>
+    <drug_name>Amlor</drug_name>
+  </medication>
+  <medication>
+    <drug_name>Temerit</drug_name>
+  </medication>
+  <medication>
+    <drug_name>Coversyl</drug_name>
+  </medication>
+  <medication>
+    <drug_name>Inexium</drug_name>
+  </medication>
+  <medication>
+    <drug_name>Kardegic</drug_name>
+  </medication>
+  <medication>
+    <drug_name>Plavix</drug_name>
+  </medication>
+  <medication>
+    <drug_name>Lasilix</drug_name>
+    <dosage>250mg</dosage>
+  </medication>
+  <medication>
+    <drug_name>Lyrica</drug_name>
+    <dosage>75 1-0-1</dosage>
+  </medication>
+"""
 
 def convert_xml_to_json(xml):
     """
@@ -140,6 +176,27 @@ def extract_text_from_pdf(file):
         text += page.extract_text()
     return text
 
+
+def display_json(json_file_path):
+    with open(json_file_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
+
+    MAX_OBJECTS = 30
+
+    st.info(f"Display limited to the first {MAX_OBJECTS} JSON objects.")
+
+    # Case 1: JSON is a list
+    if isinstance(data, list):
+        limited_data = data[:MAX_OBJECTS]
+        st.json(limited_data)
+
+    # Case 2: JSON is a dict
+    elif isinstance(data, dict):
+        limited_data = dict(list(data.items())[:MAX_OBJECTS])
+        st.json(limited_data)
+
+    else:
+        st.warning("Unsupported JSON format.")
 
 # Page configuration
 st.set_page_config(page_title="Clinical NLP Extraction Demo – Public Health AI", layout="wide")
@@ -206,13 +263,24 @@ elif step == "Extraction":
                 st.session_state.treatment_df = pd.DataFrame({"Treatment": map_atc(treatment_list)})
                 comorbidities_list = st.session_state.json_output.get("patient", {}).get("comorbidities", [])
                 st.session_state.comorbidities_df = pd.DataFrame({"Comorbidity": map_mesh(comorbidities_list)})
+                
             st.success("Extraction complete.")
         if st.session_state.xml_output:
-            with st.expander("XML Output"):
+            with st.expander("Extraction Results (XML)"):
                 st.code(st.session_state.xml_output, language="xml")
+
         if st.session_state.json_output:
-            with st.expander("JSON Output"):
-                st.json(st.session_state.json_output)
+            with st.expander("JSON Output Lifestyle"):
+                json_file_path = "src/extraction/extraction_dataset/preprocessed/lifestyle.json"
+                display_json(json_file_path)
+            
+            with st.expander("JSON Output Treatment"):
+                json_file_path = "src/extraction/extraction_dataset/preprocessed/usual_treatment.json"
+                display_json(json_file_path)
+
+            with st.expander("JSON Output Comorbidities"):
+                json_file_path = "src/extraction/extraction_dataset/preprocessed/medical_history.json"
+                display_json(json_file_path)
 
 elif step == "Results":
     st.header("Structured Results")
@@ -227,17 +295,65 @@ elif step == "Results":
             st.download_button("Download CSV", csv, "lifestyle.csv", "text/csv")
             json_str = st.session_state.lifestyle_df.to_json(orient="records")
             st.download_button("Download JSON", json_str, "lifestyle.json", "application/json")
+
         with tab2:
-            st.subheader("Usual Treatment")
-            st.dataframe(st.session_state.treatment_df)
-            csv = st.session_state.treatment_df.to_csv(index=False)
-            st.download_button("Download CSV", csv, "treatment.csv", "text/csv")
-            json_str = st.session_state.treatment_df.to_json(orient="records")
-            st.download_button("Download JSON", json_str, "treatment.json", "application/json")
+            st.session_state.treatment_df = json_to_mesh_mapped_dataframe(
+                json_path="src/extraction/extraction_dataset/preprocessed/usual_treatment.json",
+                mesh_data_path="src/structured_results/dictionnaries/dict_med.csv",
+                output_path="src/structured_results/output"
+            )
+            col1, col2, col3 = st.columns([4, 1, 1])
+            with col1:
+                st.subheader("Usual Treatment")
+            with col2:
+                csv = st.session_state.treatment_df.to_csv(index=False)
+                st.download_button(
+                    "Download CSV",
+                    csv,
+                    "treatment.csv",
+                    "text/csv"
+                )
+            with col3:
+                json_str = st.session_state.treatment_df.to_json(orient="records")
+                st.download_button(
+                    "DownloadJSON",
+                    json_str,
+                    "treatment.json",
+                    "application/json"
+                )
+            
+            edited_df = st.data_editor(
+                st.session_state.treatment_df,
+                num_rows="dynamic",
+                use_container_width=True
+            )
+            # st.dataframe()
+            st.session_state.treatment_df = edited_df
+
         with tab3:
             st.subheader("Comorbidities")
-            st.dataframe(st.session_state.comorbidities_df)
-            csv = st.session_state.comorbidities_df.to_csv(index=False)
-            st.download_button("Download CSV", csv, "comorbidities.csv", "text/csv")
-            json_str = st.session_state.comorbidities_df.to_json(orient="records")
-            st.download_button("Download JSON", json_str, "comorbidities.json", "application/json")
+
+            edited_df = st.data_editor(
+                st.session_state.comorbidities_df,
+                num_rows="dynamic",
+                use_container_width=True
+            )
+
+            # Save edits back to session state
+            st.session_state.comorbidities_df = edited_df
+
+            csv = edited_df.to_csv(index=False)
+            st.download_button(
+                "Download CSV",
+                csv,
+                "comorbidities.csv",
+                "text/csv"
+            )
+
+            json_str = edited_df.to_json(orient="records")
+            st.download_button(
+                "Download JSON",
+                json_str,
+                "comorbidities.json",
+                "application/json"
+            )
