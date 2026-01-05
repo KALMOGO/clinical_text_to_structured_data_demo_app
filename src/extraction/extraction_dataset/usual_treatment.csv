@@ -1,0 +1,37 @@
+PatientID,usual_treatment
+227,"
+  <medication>
+    <drug_name>CORTANCYL</drug_name>
+    <dosage>5mg 2-0-0</dosage>
+  </medication>
+  <medication>
+    <drug_name>INEXIUM</drug_name>
+    <dosage>40 0-0-1</dosage>
+  </medication>
+  <medication>
+    <drug_name>PROPYLTHOURACYLE</drug_name>
+    <dosage>50 1-1-0</dosage>
+  </medication>
+  <medication>
+    <drug_name>ADENURIC</drug_name>
+    <dosage>80 1-0-0</dosage>
+  </medication>
+  <medication>
+    <drug_name>KALEORID</drug_name>
+    <dosage>1000 1-1-1</dosage>
+  </medication>
+  <medication>
+    <drug_name>ARANESP</drug_name>
+    <dosage>IM</dosage>
+  </medication>
+  <medication>
+    <drug_name>IMODIUM</drug_name>
+    <dosage>à la demande</dosage>
+  </medication>
+  <medication>
+    <drug_name>GLUCOPHAGE</drug_name>
+  </medication>
+  <medication>
+    <drug_name>ALD</drug_name>
+  </medication>
+"

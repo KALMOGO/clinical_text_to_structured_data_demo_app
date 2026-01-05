@@ -26,7 +26,11 @@ class CamembertNERWithDatesModel(PIIModel):
             if any(tok in word for tok in self.placeholder_tokens):
                 continue
             
-            entity.entity_type = self.entity_mapping.get(entity.entity_type, 'OTHER')
-            cleaned_entities.append(entity)
+            # Do not anonymize 'MISC' entities
+            if entity.entity_type == 'MISC':
+                continue
+            else:
+                entity.entity_type = self.entity_mapping.get(entity.entity_type, 'OTHER')
+                cleaned_entities.append(entity)
         
         return cleaned_entities
